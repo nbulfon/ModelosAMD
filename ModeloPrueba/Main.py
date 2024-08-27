@@ -15,17 +15,14 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score,classification_report,confusion_matrix
 import statsmodels.api as sm
 
-import ConexionBd as _context
+
 import ManejoDatos as _manejoData
 import EntrenamientoTesteoDatos as _trainingTestData
 import VisualizacionDatos as _visualizeData
 
-# Paso 1: Conectar a la base de datos y obtener datos
-data = _context.EjecutarQuery('SELECT * FROM "Infraccion"')
-dataTipoInf = _context.EjecutarQuery('SELECT * FROM "TipoInfraccion"')
-# FIN Paso 1
 
-# Paso 2
+
+# Paso 1
 # llamo a la función para limpiar, procesar y generar datos
 df = _manejoData.PrepararDatos_Modelo_1(data, dataTipoInf, num_filas_aleatorias=5000)
 # Mostrar las primeras filas del DataFrame resultante
@@ -44,36 +41,29 @@ Y = df['TipoInfraccion']
 # divido en conjuntos de entrenamiento y prueba. Por defecto seteo el tamanio para probar en 20%.
 # Establezco la random seed (semilla aleatoria, para que todos los experimentos sean reproducibles) en 42 (discrecional).
 
-# Implementacion del modelo en Python con statsmodel.api
-import statsmodels.api as sm
-
-logit_model = sm.Logit(Y, X)
-
-result = logit_model.fit()
-
-result.summary()
 
 
-# Implementación del modelo en Python con scikit-learn
 
-from sklearn import linear_model
 
-logit_model = linear_model.LogisticRegression()
-logit_model.fit(X,Y)
 
-logit_model.score(X,Y)
 
-1-Y.mean()  
 
-_pandas.DataFrame(list(zip(X.columns, _numpy.transpose(logit_model.coef_))))
+# Validación del modelo logístico con conjuntos de entrenamiento y prueba
+X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=0.3, random_state=0)
 
-# Validación del modelo logístico
-from sklearn.model_selection import train_test_split
-
-X_train, X_test, Y_train, Y_test = train_test_split(X,Y, test_size = 0.3, random_state=0)
-
+# Entrenar el modelo con el conjunto de entrenamiento
 lm = linear_model.LogisticRegression()
 lm.fit(X_train, Y_train)
+
+# Realizar predicciones
+Y_pred = lm.predict(X_test)
+
+# Evaluar el modelo
+accuracy = accuracy_score(Y_test, Y_pred)
+print(f'Exactitud en el conjunto de prueba: {accuracy:.2f}')
+print(classification_report(Y_test, Y_pred))
+print(confusion_matrix(Y_test, Y_pred))
+
 
 
 #X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=0.2, random_state=42)

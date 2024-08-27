@@ -2,11 +2,12 @@
 
 import pandas as _pandas
 
+import ConexionBd as _context
 import GeneracionDatosAleatorios as _generacionDatos
 
 # Esta funcion, es para el modelo que intentara predecir la probabilidad de ocurrencia 
 # de un tipo de infraccion en una determinada ubicacion.
-def PrepararDatos_Modelo_1(data, dataTipoInf, num_filas_aleatorias):
+def PrepararDatos_Modelo_1(num_filas_aleatorias_requeridas):
     """
     Limpia y procesa los datos, y genera datos aleatorios adicionales.
     Esta funcion, es para el modelo que intentara predecir la probabilidad de ocurrencia 
@@ -15,11 +16,18 @@ def PrepararDatos_Modelo_1(data, dataTipoInf, num_filas_aleatorias):
     Args:
     data (pd.DataFrame): DataFrame que contiene los datos originales de infracciones.
     dataTipoInf (pd.DataFrame): DataFrame que contiene la relacion de TipoInfraccionId con Descripcion.
-    num_filas_aleatorias (int): Numero de filas de datos aleatorios a generar para pruebas.
+    num_filas_aleatorias_requeridas (int): Numero de filas de datos aleatorios a generar para pruebas.
 
     Returns:
     pd.DataFrame: DataFrame con los datos procesados y ampliados con datos aleatorios.
     """
+    
+    # Conectar a la base de datos y obtener datos
+    data = _context.EjecutarQuery('SELECT * FROM "Infraccion"')
+    dataTipoInf = _context.EjecutarQuery('SELECT * FROM "TipoInfraccion"')
+    # FIN Conectar a la base de datos y obtener datos
+    
+    
     # Limpiar y procesar los datos
 
     # Creo un df nuevo con las columnas que necesito
@@ -53,7 +61,7 @@ def PrepararDatos_Modelo_1(data, dataTipoInf, num_filas_aleatorias):
     # Limpiar y procesar los datos
 
     # Generacion de datos aleatorios para probar en desarrollo
-    df_aleatorio = _generacionDatos.GenerarDatosAleatorios(num_filas_aleatorias)
+    df_aleatorio = _generacionDatos.GenerarDatosAleatorios(num_filas_aleatorias_requeridas)
     
     # Concateno los datos originales con los datos generados aleatorios
     df = _pandas.concat([df, df_aleatorio], ignore_index=True)
