@@ -14,21 +14,20 @@ from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score,classification_report,confusion_matrix
 import statsmodels.api as sm
-
+from sklearn.preprocessing import LabelEncoder
 
 import ManejoDatos as _manejoData
 import EntrenamientoTesteoDatos as _trainingTestData
 import VisualizacionDatos as _visualizeData
 
 
-
 # Paso 1
 # llamo a la función para limpiar, procesar y generar datos
-df = _manejoData.PrepararDatos_Modelo_1(data, dataTipoInf, num_filas_aleatorias=5000)
+df = _manejoData.PrepararDatos_Modelo_1(num_filas_aleatorias_requeridas=5000)
 # Mostrar las primeras filas del DataFrame resultante
 print(df.head())
 print(f"Número total de filas en df: {len(df)}")
-# FIN Paso 2
+# FIN Paso 1
 
 # Paso 3: creacion del modelo.
 # => Y = 1/(1+ e^-(a + b*X)) -- funcion logistica.
@@ -38,8 +37,56 @@ X = df[['LatitudInfraccion', 'LongitudInfraccion', 'HoraDelDia', 'DiaDeLaSemana'
 Y = df['TipoInfraccion']
 
 
-# divido en conjuntos de entrenamiento y prueba. Por defecto seteo el tamanio para probar en 20%.
-# Establezco la random seed (semilla aleatoria, para que todos los experimentos sean reproducibles) en 42 (discrecional).
+
+
+
+# Implementacion del modelo en Python con statsmodel.api
+
+# Asegurarse de que todos los datos en X sean numericos
+X = X.apply(_pandas.to_numeric, errors='coerce')
+
+# Codificar la variable dependiente Y de tipo string a numerico usando LabelEncoder
+label_encoder = LabelEncoder()
+Y_encoded = label_encoder.fit_transform(Y)
+
+# Agregar una constante a X para el termino de intercepcion
+X = sm.add_constant(X)
+
+# Convertir los datos a arrays de NumPy
+X = _numpy.asarray(X)
+Y_encoded = _numpy.asarray(Y_encoded)
+
+# Crear el modelo logit
+logit_model = sm.Logit(Y_encoded, X)
+
+# Ajustar el modelo
+result = logit_model.fit()
+
+# Mostrar el resumen
+print(result.summary())
+
+# Mostrar las clases codificadas para referencia
+print("Clases codificadas:", label_encoder.classes_)
+
+
+# Implementación del modelo en Python con scikit-learn
+
+
+logit_model = linear_model.LogisticRegression()
+logit_model.fit(X,Y)
+
+logit_model.score(X,Y)
+
+1-Y.mean()  
+
+_pandas.DataFrame(list(zip(X.columns, _numpy.transpose(logit_model.coef_))))
+
+# Validación del modelo logístico
+
+X_train, X_test, Y_train, Y_test = train_test_split(X,Y, test_size = 0.3, random_state=0)
+
+lm = linear_model.LogisticRegression()
+lm.fit(X_train, Y_train)
 
 
 
