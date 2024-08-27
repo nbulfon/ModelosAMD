@@ -8,33 +8,17 @@ from sklearn.metrics import mean_squared_error, r2_score, accuracy_score
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score
 
-def DividirDatos(df, columnaVarExplicada, testSize=0.2, semillaRandom=42):
-    """
-    Divide el DataFrame en conjuntos de entrenamiento y prueba.
-
-    Args:
-    df (pd.DataFrame): El DataFrame que contiene los datos.
-    columnaVarExplicada (str): El nombre de la columna objetivo (variable dependiente).
-    test_size (float, optional): Proporción del dataset para el conjunto de prueba. Valor por defecto es 0.2.
-    semillaRandom (int, optional): Semilla para la generación de números aleatorios. Valor por defecto es 42.
-
-    Returns:
-    X_train, X_test, Y_train, Y_test: DataFrames de entrenamiento y prueba.
-    """
-    X = df.drop(columnaVarExplicada, axis=1)
-    Y = df[columnaVarExplicada]
-    return train_test_split(X, Y, test_size=testSize, random_state=semillaRandom)
 
 def EntrenarModeloLineal(X_train, Y_train):
     """
-    Entrena un modelo de regresión lineal.
+    Entrena un modelo de regresion lineal.
 
     Args:
-    X_train (pd.DataFrame): Conjunto de características de entrenamiento.
+    X_train (pd.DataFrame): Conjunto de caracteristicas de entrenamiento.
     Y_train (pd.Series): Conjunto de etiquetas de entrenamiento.
 
     Returns:
-    LinearRegression: Modelo de regresión lineal entrenado.
+    LinearRegression: Modelo de regresion lineal entrenado.
     """
     modelo_lineal = LinearRegression()
     modelo_lineal.fit(X_train, Y_train)
@@ -42,14 +26,14 @@ def EntrenarModeloLineal(X_train, Y_train):
 
 def EntrenarModeloLogistico(X_train, Y_train):
     """
-    Entrena un modelo de regresión logística.
+    Entrena un modelo de regresion logistica.
 
     Args:
-    X_train (pd.DataFrame): Conjunto de características de entrenamiento.
+    X_train (pd.DataFrame): Conjunto de caracteristicas de entrenamiento.
     Y_train (pd.Series): Conjunto de etiquetas de entrenamiento.
 
     Returns:
-    LogisticRegression: Modelo de regresión logística entrenado.
+    LogisticRegression: Modelo de regresion logistica entrenado.
     """
     modelo_logistico = LogisticRegression(solver='lbfgs', max_iter=1000)
     modelo_logistico.fit(X_train, Y_train)
@@ -62,7 +46,7 @@ def Predecir(modelo, X_test):
 
     Args:
     modelo: Modelo de machine learning entrenado.
-    X_test (pd.DataFrame): Conjunto de características de prueba.
+    X_test (pd.DataFrame): Conjunto de caracteristicas de prueba.
 
     Returns:
     np.ndarray: Predicciones realizadas por el modelo.
@@ -72,11 +56,11 @@ def Predecir(modelo, X_test):
 
 def EvaluarModeloLineal(modelo, X_test, Y_test):
     """
-    Evalúa un modelo de regresión lineal utilizando R^2 y el error cuadrático medio.
+    Evalua un modelo de regresion lineal utilizando R^2 y el error cuadratico medio.
 
     Args:
-    modelo: Modelo de regresión lineal entrenado.
-    X_test (pd.DataFrame): Conjunto de características de prueba.
+    modelo: Modelo de regresion lineal entrenado.
+    X_test (pd.DataFrame): Conjunto de caracteristicas de prueba.
     Y_test (pd.Series): Conjunto de etiquetas de prueba.
 
     Returns:
@@ -89,11 +73,11 @@ def EvaluarModeloLineal(modelo, X_test, Y_test):
 
 def EvaluarModeloLogistico(modelo, X_test, y_test):
     """
-    Evalúa un modelo de regresión logística utilizando exactitud.
+    Evalua un modelo de regresion logistica utilizando exactitud.
 
     Args:
-    modelo: Modelo de regresión logística entrenado.
-    X_test (pd.DataFrame): Conjunto de características de prueba.
+    modelo: Modelo de regresion logistica entrenado.
+    X_test (pd.DataFrame): Conjunto de caracteristicas de prueba.
     Y_test (pd.Series): Conjunto de etiquetas de prueba.
 
     Returns:
@@ -102,21 +86,3 @@ def EvaluarModeloLogistico(modelo, X_test, y_test):
     predicciones = modelo.predict(X_test)
     exactitud = accuracy_score(y_test, predicciones)
     return exactitud
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

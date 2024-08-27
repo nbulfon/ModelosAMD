@@ -2,14 +2,14 @@
 
 import matplotlib.pyplot as _plt
 
-def GraficarResultados(y_test, y_pred, titulo='Resultados de la Predicción'):
+def GraficarResultados(y_test, y_pred, titulo='Resultados de la Prediccion'):
     """
-    Grafica los resultados de la predicción comparando los valores reales con los predichos.
+    Grafica los resultados de la prediccion comparando los valores reales con los predichos.
 
     Args:
     y_test (pd.Series): Valores reales del conjunto de prueba.
     y_pred (np.ndarray): Valores predichos por el modelo.
-    titulo (str, optional): Título del gráfico. Valor por defecto es 'Resultados de la Predicción'.
+    titulo (str, optional): Titulo del grafico. Valor por defecto es 'Resultados de la Prediccion'.
     """
     _plt.figure(figsize=(10, 6))
     _plt.scatter(y_test, y_pred, color='blue')
