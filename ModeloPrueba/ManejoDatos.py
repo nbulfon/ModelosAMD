@@ -1,7 +1,6 @@
 # Modulo que se va a encargar del data cleaning.
 
 import pandas as _pandas
-
 import ConexionBd as _context
 import GeneracionDatosAleatorios as _generacionDatos
 

@@ -1,6 +1,7 @@
 # Modulo de visualización de los datos.
 
 import matplotlib.pyplot as _plt
+import seaborn as sns
 
 def GraficarResultados(y_test, y_pred, titulo='Resultados de la Prediccion'):
     """
@@ -18,3 +19,63 @@ def GraficarResultados(y_test, y_pred, titulo='Resultados de la Prediccion'):
     _plt.ylabel('Valores Predichos')
     _plt.title(titulo)
     _plt.show()
+    
+
+def VisualizarDistribucionProbabilidades(Y_pred_proba, num_clases):
+    """
+    Visualiza la distribución de las probabilidades predichas para cada clase.
+    
+    Args:
+    Y_pred_proba (np.array): Array de probabilidades predichas con forma (n_samples, num_clases).
+    num_clases (int): Número de clases en el problema de clasificación.
+    
+    Returns:
+    None: Muestra gráficos de las distribuciones de probabilidades.
+    """
+    
+    _plt.figure(figsize=(10, 6))
+    
+    # Iterar sobre el número de clases para graficar la distribución de probabilidades de cada clase
+    for i in range(num_clases):
+        sns.kdeplot(Y_pred_proba[:, i], label=f'Clase {i}', shade=True)
+    
+    _plt.xlabel('Probabilidad predicha')
+    _plt.ylabel('Densidad')
+    _plt.title('Distribución de probabilidades por clase')
+    _plt.legend()
+    _plt.show()
+    
+    
+def GraficarDispersion(X, Y_test, Y_pred):
+    """
+    Genera un gráfico de dispersión para visualizar las predicciones del modelo.
+
+    Args:
+    X (pd.DataFrame o np.array): Conjunto de características de prueba (al menos 2 columnas).
+    Y_test (pd.Series o np.array): Conjunto de etiquetas de prueba.
+    Y_pred (pd.Series o np.array): Predicciones del modelo.
+
+    Returns:
+    None: Muestra un gráfico de dispersión.
+    """
+
+    # Asumimos que las dos primeras columnas de X son las características a graficar
+    _plt.figure(figsize=(10, 6))
+    
+    # Gráfico de dispersión con las clases reales
+    _plt.scatter(X[:, 0], X[:, 1], c=Y_test, marker='o', cmap='coolwarm', label='Real', alpha=0.6)
+    
+    # Gráfico de dispersión con las predicciones del modelo
+    _plt.scatter(X[:, 0], X[:, 1], c=Y_pred, marker='x', cmap='coolwarm', label='Predicción', alpha=0.6)
+    
+    _plt.xlabel('Característica 1')
+    _plt.ylabel('Característica 2')
+    _plt.title('Gráfico de Dispersión de Predicciones')
+    _plt.legend()
+    _plt.show()
+    
+    
+    
+    
+    
+    
