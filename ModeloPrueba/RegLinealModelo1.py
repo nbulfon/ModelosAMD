@@ -6,7 +6,7 @@
 ###
 ### El objetivo de este segundo modelo, es predecir la cantidad de infracciones,
 ### en una  determinada ubicacion (dada por latitud y longitud) y un determinado momento (FechaYHoraInfraccion).
-### (Regresion logistica multinomial).
+### (Regresion Lineal Multiple).
 ###
 import matplotlib.pyplot as _plt
 import pandas as _pandas
@@ -19,7 +19,10 @@ import VisualizacionDatos as _visualizeData
 
 # Paso 1
 # llamo a la función para limpiar, procesar y generar datos
-df = _manejoData.PrepararDatos_Modelo_2(num_filas_aleatorias_requeridas=8000)
+
+#IMPORTANTE. COMO AHORA ESTOY HACIENDO UN GROUP BY, PROBAR PRIMERO BIEN
+# SIN AGREGARLE DATOS ALEATORIOS, Y LUEGO PROBARLO DE NUEVO, CON ESOS DATOS EXTRA.
+df = _manejoData.PrepararDatos_Modelo_2(num_filas_aleatorias_requeridas=5000)
 
 # Mostrar las primeras filas del DataFrame resultante
 print(df.head())

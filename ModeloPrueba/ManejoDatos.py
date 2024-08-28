@@ -52,7 +52,7 @@ def PrepararDatos_Modelo_1(num_filas_aleatorias_requeridas):
     # Generacion aleatoria de datos. Sirve para ambiente de DESARROLLO.
     if (num_filas_aleatorias_requeridas > 0):
         # Generacion de datos aleatorios para probar en desarrollo
-        df_aleatorio = _generacionDatos.GenerarDatosAleatorios(num_filas_aleatorias_requeridas)
+        df_aleatorio = _generacionDatos.GenerarDatosAleatorios_Modelo_1(num_filas_aleatorias_requeridas)
         
         # Concateno los datos originales con los datos generados aleatorios
         df = _pandas.concat([df, df_aleatorio], ignore_index=True)
@@ -104,7 +104,12 @@ def PrepararDatos_Modelo_2(num_filas_aleatorias_requeridas):
     
     # Generacion aleatoria de datos
     if (num_filas_aleatorias_requeridas > 0):
-        df_aleatorio = _generacionDatos.GenerarDatosAleatorios(num_filas_aleatorias_requeridas)
+        df_aleatorio = _generacionDatos.GenerarDatosAleatorios_Modelo_2(
+            dataTipoInf.columns,
+            dataTipoVehiculo.columns,
+            dataGrupoVehiculo.columns,
+            data['NumeroDeSerieEquipo'].values,
+            num_filas_aleatorias_requeridas)
         df_agrupado = _pandas.concat([df_agrupado, df_aleatorio], ignore_index=True)
 
     return df_agrupado
