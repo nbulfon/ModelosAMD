@@ -4,7 +4,30 @@
 # a la base de datos hasta la evaluación del modelo y posteriores conclusiones.
 
 ###
-### El objetivo de este primer modelo, es predecir la probabilidad de ocurrencia de un tipo de infraccion
+### El objetivo de este segundo modelo, es predecir la cantidad de infracciones,
 ### en una  determinada ubicacion (dada por latitud y longitud) y un determinado momento (FechaYHoraInfraccion).
 ### (Regresion logistica multinomial).
 ###
+import matplotlib.pyplot as _plt
+import pandas as _pandas
+import numpy as _numpy
+import statsmodels.formula.api as _smf
+
+import ManejoDatos as _manejoData
+import EntrenamientoTesteoDatos as _trainingTestData
+import VisualizacionDatos as _visualizeData
+
+# Paso 1
+# llamo a la función para limpiar, procesar y generar datos
+df = _manejoData.PrepararDatos_Modelo_2(num_filas_aleatorias_requeridas=8000)
+
+# Mostrar las primeras filas del DataFrame resultante
+print(df.head())
+print(f"Número total de filas en df: {len(df)}")
+
+# Paso 2: creacion del modelo.
+# => Y = 1/(1+ e^-(a + b*X)) -- funcion logistica.
+# TipoInfraccion = 1/ 1 +( e^-( a + b1 * Latitud + b2 * Longitud + b3 * Horainfraccion + b4 * DiaSemanaInfraccion + b5 * MesInfraccion))
+# separo variable explicada y explicativas ->
+Y = df['CantidadInfracciones']
+X = df.drop(columns=['CantidadInfracciones'])

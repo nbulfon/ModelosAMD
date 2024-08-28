@@ -31,7 +31,7 @@ print(df.head())
 print(f"Número total de filas en df: {len(df)}")
 # FIN Paso 1
 
-# Paso 3: creacion del modelo.
+# Paso 2: creacion del modelo.
 # => Y = 1/(1+ e^-(a + b*X)) -- funcion logistica.
 # TipoInfraccion = 1/ 1 +( e^-( a + b1 * Latitud + b2 * Longitud + b3 * Horainfraccion + b4 * DiaSemanaInfraccion + b5 * MesInfraccion))
 # separo variable explicada y explicativas ->
@@ -99,12 +99,13 @@ print(f'Exactitud en el conjunto de prueba: {accuracy:.2f}')
 print("\nReporte de Clasificación:")
 print(classification_report(Y_test, Y_pred))
 
-# FIN Paso 3.
+# FIN Paso 2.
 
 
-# Paso 4: Visualizar resultados
+# Paso 3: Visualizar resultados
 _visualizeData.GraficarResultados(Y_test,Y_pred)
 _visualizeData.VisualizarDistribucionProbabilidades(Y_pred_proba,4)
 #_visualizeData.GraficarDispersion(X_test, Y_test, Y_pred)
-# Paso 5: Sacar conclusiones.
+
+# Paso 4: Sacar conclusiones.
 

@@ -4,7 +4,7 @@ import pandas as _pandas
 import ConexionBd as _context
 import GeneracionDatosAleatorios as _generacionDatos
 
-# Esta funcion, es para el modelo que intentara predecir la probabilidad de ocurrencia 
+# Esta funcion, es para preparar los datos del modelo que intentara predecir la probabilidad de ocurrencia 
 # de un tipo de infraccion en una determinada ubicacion.
 def PrepararDatos_Modelo_1(num_filas_aleatorias_requeridas):
     """
@@ -13,8 +13,6 @@ def PrepararDatos_Modelo_1(num_filas_aleatorias_requeridas):
     de un tipo de infraccion en una determinada ubicacion.
 
     Args:
-    data (pd.DataFrame): DataFrame que contiene los datos originales de infracciones.
-    dataTipoInf (pd.DataFrame): DataFrame que contiene la relacion de TipoInfraccionId con Descripcion.
     num_filas_aleatorias_requeridas (int): Numero de filas de datos aleatorios a generar para pruebas.
 
     Returns:
@@ -39,7 +37,7 @@ def PrepararDatos_Modelo_1(num_filas_aleatorias_requeridas):
     df['LatitudInfraccion'] = _pandas.to_numeric(df['LatitudInfraccion'], errors='coerce')
     df['LongitudInfraccion'] = _pandas.to_numeric(df['LongitudInfraccion'], errors='coerce')
 
-    # Relleno valores nulls
+    # Relleno valores NaN con la media. -----> ESTO ES UN CRITERIO DISCRECIONAL.HAY QUE CHARLARLO.
     df = RellenarNullsConLaMedia(df, 'LatitudInfraccion')
     df = RellenarNullsConLaMedia(df, 'LongitudInfraccion')
 
@@ -48,25 +46,68 @@ def PrepararDatos_Modelo_1(num_filas_aleatorias_requeridas):
     df['DiaDeLaSemana'] = data['FechaYHoraInfraccion'].dt.dayofweek  # Lunes = 0, Domingo = 6
     df['Mes'] = data['FechaYHoraInfraccion'].dt.month
 
-    # Creo un diccionario de mapeo desde el DataFrame dataTipoInf
-    tipo_infraccion_dict = dataTipoInf.set_index('TipoInfraccionId')['Descripcion'].to_dict()
-
-    # Uso map() para asignar las descripciones de las infracciones a la columna 'TipoInfraccion'
-    df['TipoInfraccion'] = df['TipoInfraccionId'].map(tipo_infraccion_dict)
-
-    # Elimino la columna 'TipoInfraccionId' que asigne temporalmente
-    df.drop(columns=['TipoInfraccionId'], inplace=True)
+    # mapeo de columnmas para tener la descripcion y no el id en mi df a utilizar.
+    df = MapearColumna(df, dataTipoInf, 'TipoInfraccionId', 'Descripcion', 'TipoInfraccion')
     
-    # Limpiar y procesar los datos
-
-    # Generacion de datos aleatorios para probar en desarrollo
-    df_aleatorio = _generacionDatos.GenerarDatosAleatorios(num_filas_aleatorias_requeridas)
-    
-    # Concateno los datos originales con los datos generados aleatorios
-    df = _pandas.concat([df, df_aleatorio], ignore_index=True)
+    # Generacion aleatoria de datos. Sirve para ambiente de DESARROLLO.
+    if (num_filas_aleatorias_requeridas > 0):
+        # Generacion de datos aleatorios para probar en desarrollo
+        df_aleatorio = _generacionDatos.GenerarDatosAleatorios(num_filas_aleatorias_requeridas)
+        
+        # Concateno los datos originales con los datos generados aleatorios
+        df = _pandas.concat([df, df_aleatorio], ignore_index=True)
     # FIN Generacion de datos aleatorios
     
     return df
+
+# Esta funcion, es para preparar los datos del modelo que intentara predecir
+# la cantidad de infracciones, en una determinada ubicacion, en un determinado momento.
+def PrepararDatos_Modelo_2(num_filas_aleatorias_requeridas):
+    """
+    Limpia y procesa los datos, y genera datos aleatorios adicionales.
+    Esta funcion es para el modelo que intentara predecir la cantidad de infracciones
+    en una determinada ubicacion, en una determinada fecha (dia, mes o anio).
+
+    Args:
+    num_filas_aleatorias_requeridas (int): Numero de filas de datos aleatorios a generar para pruebas.
+
+    Returns:
+    pd.DataFrame: DataFrame con los datos procesados y agregados.
+    """
+    
+    # Conectar a la base de datos y obtener datos
+    data = _context.EjecutarQuery('SELECT * FROM "Infraccion"')
+    dataTipoInf = _context.EjecutarQuery('SELECT * FROM "TipoInfraccion"')
+    dataTipoVehiculo = _context.EjecutarQuery('SELECT * FROM "TipoVehiculo"')
+    dataGrupoVehiculo = _context.EjecutarQuery('SELECT * FROM "GrupoVehiculo"')
+    
+    # Crear un df nuevo con las columnas que necesito
+    df = data[['NumeroDeSerieEquipo', 'FechaYHoraInfraccion', 
+               'TipoInfraccionId', 'GrupoVehiculoId', 'TipoVehiculoId']]
+    
+    # Rellenar valores NaN con la media
+    df = RellenarNullsConLaMedia(df, 'TipoVehiculoId')
+    df = RellenarNullsConLaMedia(df, 'GrupoVehiculoId')
+    
+    # Crear nuevas columnas para tener la fecha separada
+    df['HoraDelDia'] = data['FechaYHoraInfraccion'].dt.hour
+    df['DiaDeLaSemana'] = data['FechaYHoraInfraccion'].dt.dayofweek  # Lunes = 0, Domingo = 6
+    df['Mes'] = data['FechaYHoraInfraccion'].dt.month
+
+    # Mapear descripciones
+    df = MapearColumna(df, dataTipoInf, 'TipoInfraccionId', 'Descripcion', 'TipoInfraccion')
+    df = MapearColumna(df, dataTipoVehiculo, 'TipoVehiculoId', 'Descripcion', 'TipoVehiculo')
+    df = MapearColumna(df, dataGrupoVehiculo, 'GrupoVehiculoId', 'Descripcion', 'GrupoVehiculo')
+
+    # Agrupar por NumeroDeSerieEquipo --->
+    df_agrupado = df.groupby(['NumeroDeSerieEquipo']).size().reset_index(name='CantidadInfracciones')
+    
+    # Generacion aleatoria de datos
+    if (num_filas_aleatorias_requeridas > 0):
+        df_aleatorio = _generacionDatos.GenerarDatosAleatorios(num_filas_aleatorias_requeridas)
+        df_agrupado = _pandas.concat([df_agrupado, df_aleatorio], ignore_index=True)
+
+    return df_agrupado
 
 
 def RellenarNullsConLaMedia(df, nombreColumna):
@@ -82,6 +123,32 @@ def RellenarNullsConLaMedia(df, nombreColumna):
     """
     df[nombreColumna] = df[nombreColumna].fillna(df[nombreColumna].mean())
     return df
+
+def MapearColumna(df_a_mapear, df_para_ser_mapeado, column_id, column_description, new_column_name):
+    """
+    Mapea una columna de un DataFrame utilizando un diccionario de mapeo creado
+    a partir de otro DataFrame.
+
+    Parametros:
+    df (DataFrame): DataFrame principal al que se le aplicara el mapeo.
+    df_para_ser_mapeado (DataFrame): DataFrame de mapeo que contiene las columnas para crear el diccionario.
+    column_id (str): Nombre de la columna en df que sera utilizada para el mapeo.
+    column_description (str): Nombre de la columna en mapping_df que contiene las descripciones para el mapeo.
+    new_column_name (str): Nombre de la nueva columna que se creará en df después de aplicar el mapeo.
+
+    Retorna:
+    DataFrame: DataFrame actualizado con la nueva columna mapeada y sin la columna original.
+    """
+    # Creo un diccionario de mapeo desde el DataFrame mapping_df
+    mapping_dict = df_para_ser_mapeado.set_index(column_id)[column_description].to_dict()
+
+    # Uso map() para asignar las descripciones a la nueva columna
+    df_a_mapear[new_column_name] = df_a_mapear[column_id].map(mapping_dict)
+
+    # Elimino la columna original que se utilizó para el mapeo
+    df_a_mapear.drop(columns=[column_id], inplace=True)
+
+    return df_a_mapear
 
 
 def EliminarColumna(df, nombreColumna):
