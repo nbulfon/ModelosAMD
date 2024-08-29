@@ -109,7 +109,7 @@ def PrepararDatos_Modelo_2(num_filas_aleatorias_requeridas=5000):
             dataTipoVehiculo.columns,
             dataGrupoVehiculo.columns,
             data['NumeroDeSerieEquipo'].values,
-            5000)
+            numeroFilasRequeridas=5000)
         df = _pandas.concat([df, df_aleatorio], ignore_index=True)
 
 
@@ -132,6 +132,101 @@ def PrepararDatos_Modelo_2(num_filas_aleatorias_requeridas=5000):
     
     return df_agrupado
 
+# Esta funcion, es para preparar los datos del modelo que intentara predecir la probabilidad de ocurrencia
+# de que los proximos n registros sean con infraccion.
+def PrepararDatos_Modelo_3(num_filas_aleatorias_requeridas):
+    """
+    Limpia y procesa los datos, y genera datos aleatorios adicionales.
+    Esta funcion, es para el modelo que intentara predecir la probabilidad de ocurrencia 
+    de que los proximos n registros sean con infraccion.
+
+    Args:
+    num_filas_aleatorias_requeridas (int): Numero de filas de datos aleatorios a generar para pruebas.
+
+    Returns:
+    pd.DataFrame: DataFrame con los datos procesados y ampliados con datos aleatorios.
+    """
+    
+    # Conectar a la base de datos y obtener datos
+    data = _context.EjecutarQuery('SELECT * FROM "Infraccion"')
+    data['Si_Infraccion'] = True
+    dataTipoInf = _context.EjecutarQuery('SELECT * FROM "TipoInfraccion"')
+    dataTipoVehiculo = _context.EjecutarQuery('SELECT * FROM "TipoVehiculo"')
+    dataGrupoVehiculo = _context.EjecutarQuery('SELECT * FROM "GrupoVehiculo"')
+    
+    ## -----ESTA PARTE LUEGO SE VA, FALTA AGREGAR LA TABLA EN LA BASE DE DATOS-----
+    filepath = r"C:\\Nicolas\\AMD_Modelos_ML\\ModelosAMD\\ModeloPrueba"
+    file = filepath + "\\" + "URBAN_000372.csv"
+    dataEstadisticas = _pandas.read_csv(file, sep=";")
+    dataEstadisticas['Si_Infraccion'] = False
+    estadisticas_seleccionadas = dataEstadisticas[['Si_Infraccion','VELOCIDAD','Carril']]
+    
+    dataEstadisticas['FECHA'] = _pandas.to_datetime(dataEstadisticas['FECHA'], format='%d/%m/%Y')
+    dataEstadisticas['HORA'] = _pandas.to_datetime(dataEstadisticas['HORA'], format='%H:%M:%S')
+    estadisticas_seleccionadas['Mes'] = dataEstadisticas['FECHA'].dt.month
+    estadisticas_seleccionadas['DiaDeLaSemana'] = dataEstadisticas['FECHA'].dt.dayofweek
+    estadisticas_seleccionadas['HoraDelDia'] = dataEstadisticas['HORA'].dt.hour
+    
+    # renombro columnas para luego hacerlas coincidir los datos en el df ->
+    estadisticas_seleccionadas.rename(columns={'VELOCIDAD': 'VelocidadRegistrada'}, inplace=True)
+    ## -----ESTA PARTE LUEGO SE VA, FALTA AGREGAR LA TABLA EN LA BASE DE DATOS-----
+    
+    # Crear un df nuevo con las columnas que necesito
+    df = data[['Si_Infraccion','NumeroDeSerieEquipo', 'FechaYHoraInfraccion', 
+               'TipoInfraccionId', 'GrupoVehiculoId', 'TipoVehiculoId',
+               'VelocidadRegistrada','VelocidadPermitida',
+               'ProvinciaInfraccion', 'PartidoInfraccion']]
+    
+    
+    # Rellenar valores NaN con la media o la moda s/corresponda.
+    df = RellenarNullsConLaMedia(df, 'TipoVehiculoId')
+    df = RellenarNullsConLaMedia(df, 'GrupoVehiculoId')
+    df = RellenarNullsConLaModa(df, 'ProvinciaInfraccion')
+    df = RellenarNullsConLaModa(df, 'PartidoInfraccion')
+    
+    # Crear nuevas columnas para tener la fecha separada
+    df['HoraDelDia'] = data['FechaYHoraInfraccion'].dt.hour
+    df['DiaDeLaSemana'] = data['FechaYHoraInfraccion'].dt.dayofweek  # Lunes = 0, Domingo = 6
+    df['Mes'] = data['FechaYHoraInfraccion'].dt.month
+
+    # Mapear descripciones
+    df = MapearColumna(df, dataTipoInf, 'TipoInfraccionId', 'Descripcion', 'TipoInfraccion')
+    df = MapearColumna(df, dataTipoVehiculo, 'TipoVehiculoId', 'Descripcion', 'TipoVehiculo')
+    df = MapearColumna(df, dataGrupoVehiculo, 'GrupoVehiculoId', 'Descripcion', 'GrupoVehiculo')
+    
+    # datos compartidos entre los df:
+    # Si_Infraccion, VelocidadRegistrada, Mes, DiaDeLaSemana, HoraDelDia
+    # no compartido ---> Carril
+    columnas_comunes = ['Si_Infraccion', 'VelocidadRegistrada', 'Mes', 'DiaDeLaSemana', 'HoraDelDia']
+    
+    df['VelocidadRegistrada'] = df['VelocidadRegistrada'].str.replace(',', '.').astype('float64')
+    df['VelocidadPermitida'] = df['VelocidadPermitida'].str.replace(',', '.').astype('float64')
+    #print(estadisticas_seleccionadas.VelocidadRegistrada.dtypes)
+    
+    df = _pandas.concat([df, estadisticas_seleccionadas], ignore_index=True)
+    df = EliminarColumna(df, 'FechaYHoraInfraccion')
+    df = RellenarNullsConLaMedia(df, 'VelocidadPermitida')
+    df = RellenarNullsConLaMedia(df, 'VelocidadRegistrada')
+    df = RellenarNullsConLaModa(df, 'TipoVehiculo')
+    df = RellenarNullsConLaModa(df, 'GrupoVehiculo')
+    df = RellenarNullsConLaModa(df, 'TipoInfraccion')
+    df = RellenarNullsConLaModa(df, 'NumeroDeSerieEquipo')
+    df = RellenarNullsConLaModa(df, 'ProvinciaInfraccion')
+    df = RellenarNullsConLaModa(df, 'PartidoInfraccion')
+    df = RellenarNullsConLaModa(df, 'NumeroDeSerieEquipo')
+    
+    
+    # Generacion aleatoria de datos
+    if (num_filas_aleatorias_requeridas > 0):
+        df_aleatorio = _generacionDatos.GenerarDatosAleatorios_Modelo_3(
+            dataTipoInf.columns,
+            dataTipoVehiculo.columns,
+            dataGrupoVehiculo.columns,
+            data['NumeroDeSerieEquipo'].values,
+            numeroFilasRequeridas=num_filas_aleatorias_requeridas)
+        df = _pandas.concat([df, df_aleatorio], ignore_index=True)
+    
+    return df
 
 def RellenarNullsConLaMedia(df, nombreColumna):
     """
