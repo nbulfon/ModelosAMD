@@ -74,7 +74,25 @@ def GraficarDispersion(X, Y_test, Y_pred):
     _plt.legend()
     _plt.show()
     
-    
+
+def GraficarDistribucionErrores(errores_residuales):
+    """
+    Grafica la distribución de los errores residuales usando un histograma
+    con una curva de densidad superpuesta.
+
+    Args:
+    errores_residuales (array-like): Array o lista de errores residuales.
+
+    Returns:
+    None
+    """
+    _plt.figure(figsize=(10, 6))
+    sns.histplot(errores_residuales, kde=True, bins=30, color='blue', alpha=0.7)
+    _plt.title("Distribución de Errores Residuales")
+    _plt.xlabel("Error Residual")
+    _plt.ylabel("Frecuencia")
+    _plt.grid()
+    _plt.show()
     
     
     

@@ -207,6 +207,7 @@ def PrepararDatos_Modelo_3(num_filas_aleatorias_requeridas):
     df = EliminarColumna(df, 'FechaYHoraInfraccion')
     df = RellenarNullsConLaMedia(df, 'VelocidadPermitida')
     df = RellenarNullsConLaMedia(df, 'VelocidadRegistrada')
+    df = RellenarNullsConLaMedia(df, 'Carril')
     df = RellenarNullsConLaModa(df, 'TipoVehiculo')
     df = RellenarNullsConLaModa(df, 'GrupoVehiculo')
     df = RellenarNullsConLaModa(df, 'TipoInfraccion')
@@ -346,22 +347,6 @@ def RellenarNullsConValor(df, nombreColumna, valor):
     return df
 
 
-def ConvertirATipo(df, nombreColumna, tipo):
-    """
-    Convierte los datos de la columna especificada a un tipo de dato especifico.
-
-    Args:
-    df (pd.DataFrame): El DataFrame que contiene los datos.
-    nombreColumna (str): El nombre de la columna a convertir.
-    tipo: El tipo de dato al cual se quiere convertir la columna (por ejemplo, float, int, str).
-
-    Returns:
-    pd.DataFrame: El DataFrame modificado con la columna convertida al tipo de dato especificado.
-    """
-    df[nombreColumna] = df[nombreColumna].astype(tipo)
-    return df
-
-
 def NormalizarColumna(df, nombreColumna):
     """
     Normaliza los valores de una columna para que esten en un rango de 0 a 1.
@@ -388,7 +373,10 @@ def CodificarColumnasCategoricas(df, nombreColumna):
     Returns:
     pd.DataFrame: El DataFrame modificado con las columnas categoricas convertidas en variables dummy.
     """
-    df = _pandas.get_dummies(df, columns=[nombreColumna])
+    
+    # Agrego drop_first=True para evitar problemas de colinealidad
+    # (donde una variable se puede predecir perfectamente con otras variables).
+    df = _pandas.get_dummies(df, columns=[nombreColumna], drop_first=True)
     return df
 
 
