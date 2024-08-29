@@ -66,6 +66,14 @@ def GenerarDatosAleatorios_Modelo_2(columnas_tiposInfraccion,
     dias_semana_aleatorios = _numpy.random.randint(0, 7, size=numeroFilasRequeridas)
     meses_aleatorios = _numpy.random.randint(1, 13, size=numeroFilasRequeridas)
 
+    # Provincia
+    provincias = ['Buenos Aires']
+    provincias_aleatorios = _numpy.random.choice(provincias, size=numeroFilasRequeridas)
+    
+    # Partido
+    partidos = ['La Plata', 'ALMIRANTE BROWN', 'San Vicente', 'San Nicolas', 'Ensenada', 'Berisso']
+    partidos_aleatorios = _numpy.random.choice(partidos, size=numeroFilasRequeridas)
+    
     # numero de serie equipo ->
     equipos = valores_numeroSerieEquipo
     equipos_aleatorios = _numpy.random.choice(equipos, size=numeroFilasRequeridas)
@@ -91,7 +99,9 @@ def GenerarDatosAleatorios_Modelo_2(columnas_tiposInfraccion,
         'TipoInfraccion': tipo_infraccion_aleatorios,
         'TipoVehiculo': tipo_vehiculo_aleatorios,
         'GrupoVehiculo': grupos_vehiculo_aleatorios,
-        'NumeroDeSerieEquipo': equipos_aleatorios
+        'NumeroDeSerieEquipo': equipos_aleatorios,
+        'ProvinciaInfraccion': provincias_aleatorios,
+        'PartidoInfraccion':partidos_aleatorios
     })
     
     return df_aleatorio

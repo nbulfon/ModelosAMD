@@ -62,7 +62,7 @@ def PrepararDatos_Modelo_1(num_filas_aleatorias_requeridas):
 
 # Esta funcion, es para preparar los datos del modelo que intentara predecir
 # la cantidad de infracciones, en una determinada ubicacion, en un determinado momento.
-def PrepararDatos_Modelo_2(num_filas_aleatorias_requeridas):
+def PrepararDatos_Modelo_2(num_filas_aleatorias_requeridas=5000):
     """
     Limpia y procesa los datos, y genera datos aleatorios adicionales.
     Esta funcion es para el modelo que intentara predecir la cantidad de infracciones
@@ -83,11 +83,14 @@ def PrepararDatos_Modelo_2(num_filas_aleatorias_requeridas):
     
     # Crear un df nuevo con las columnas que necesito
     df = data[['NumeroDeSerieEquipo', 'FechaYHoraInfraccion', 
-               'TipoInfraccionId', 'GrupoVehiculoId', 'TipoVehiculoId']]
+               'TipoInfraccionId', 'GrupoVehiculoId', 'TipoVehiculoId',
+               'ProvinciaInfraccion', 'PartidoInfraccion']]
     
-    # Rellenar valores NaN con la media
+    # Rellenar valores NaN con la media o la moda s/corresponda.
     df = RellenarNullsConLaMedia(df, 'TipoVehiculoId')
     df = RellenarNullsConLaMedia(df, 'GrupoVehiculoId')
+    df = RellenarNullsConLaModa(df, 'ProvinciaInfraccion')
+    df = RellenarNullsConLaModa(df, 'PartidoInfraccion')
     
     # Crear nuevas columnas para tener la fecha separada
     df['HoraDelDia'] = data['FechaYHoraInfraccion'].dt.hour
@@ -98,9 +101,6 @@ def PrepararDatos_Modelo_2(num_filas_aleatorias_requeridas):
     df = MapearColumna(df, dataTipoInf, 'TipoInfraccionId', 'Descripcion', 'TipoInfraccion')
     df = MapearColumna(df, dataTipoVehiculo, 'TipoVehiculoId', 'Descripcion', 'TipoVehiculo')
     df = MapearColumna(df, dataGrupoVehiculo, 'GrupoVehiculoId', 'Descripcion', 'GrupoVehiculo')
-
-    # Agrupar por NumeroDeSerieEquipo --->
-    df_agrupado = df.groupby(['NumeroDeSerieEquipo']).size().reset_index(name='CantidadInfracciones')
     
     # Generacion aleatoria de datos
     if (num_filas_aleatorias_requeridas > 0):
@@ -109,9 +109,27 @@ def PrepararDatos_Modelo_2(num_filas_aleatorias_requeridas):
             dataTipoVehiculo.columns,
             dataGrupoVehiculo.columns,
             data['NumeroDeSerieEquipo'].values,
-            num_filas_aleatorias_requeridas)
-        df_agrupado = _pandas.concat([df_agrupado, df_aleatorio], ignore_index=True)
+            5000)
+        df = _pandas.concat([df, df_aleatorio], ignore_index=True)
 
+
+    df_agrupado = df.groupby('NumeroDeSerieEquipo').agg(
+       CantidadInfracciones=('NumeroDeSerieEquipo', 'size'),
+       TipoInfraccion=('TipoInfraccion', 'first'),              # o 'mode' para el valor más frecuente
+       TipoVehiculo=('TipoVehiculo', 'first'),                  # o 'mode'
+       GrupoVehiculo=('GrupoVehiculo', 'first'),                # o 'mode'
+       HoraDelDia=('HoraDelDia', 'first'),                      # o 'mean' si necesitas el promedio
+       DiaDeLaSemana=('DiaDeLaSemana', 'first'),                # o 'mean'
+       Mes=('Mes', 'first'),
+       Provinci=('ProvinciaInfraccion','first'),
+       Partido=('PartidoInfraccion','first')
+   ).reset_index()
+    
+    
+    # Hacer el groupBy por NumeroDeSerieEquipo, para luego predecir CantidadInfracciones,
+    # me deja con muy pocos grados de libertad...por lo cual, tendria, o ver que en produccion, hayan muchos 
+    # equipos diferentes (algo raro), o, usar otra variable para agrupar, o, no agrupar y usar otra variable...
+    
     return df_agrupado
 
 
@@ -128,6 +146,22 @@ def RellenarNullsConLaMedia(df, nombreColumna):
     """
     df[nombreColumna] = df[nombreColumna].fillna(df[nombreColumna].mean())
     return df
+
+def RellenarNullsConLaModa(df, nombreColumna):
+    """
+    Rellena los valores NaN en una columna de tipo string con el valor mas frecuente.
+
+    Args:
+    df (pd.DataFrame): DataFrame en el que se realizara la operacion.
+    nombreColumna (str): Nombre de la columna a procesar.
+
+    Returns:
+    pd.DataFrame: DataFrame con los NaN rellenados.
+    """
+    moda = df[nombreColumna].mode()[0]
+    df[nombreColumna] = df[nombreColumna].fillna(moda)
+    return df
+
 
 def MapearColumna(df_a_mapear, df_para_ser_mapeado, column_id, column_description, new_column_name):
     """

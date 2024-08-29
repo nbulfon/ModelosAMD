@@ -13,7 +13,7 @@ import pandas as _pandas
 import numpy as _numpy
 import statsmodels.formula.api as _smf
 
-import ManejoDatos as _manejoData
+import Modulos.ManejoDatos as _manejoData
 import EntrenamientoTesteoDatos as _trainingTestData
 import VisualizacionDatos as _visualizeData
 
@@ -22,15 +22,42 @@ import VisualizacionDatos as _visualizeData
 
 #IMPORTANTE. COMO AHORA ESTOY HACIENDO UN GROUP BY, PROBAR PRIMERO BIEN
 # SIN AGREGARLE DATOS ALEATORIOS, Y LUEGO PROBARLO DE NUEVO, CON ESOS DATOS EXTRA.
-df = _manejoData.PrepararDatos_Modelo_2(num_filas_aleatorias_requeridas=5000)
+df = _manejoData.PrepararDatos_Modelo_2(num_filas_aleatorias_requeridas=0)
 
 # Mostrar las primeras filas del DataFrame resultante
 print(df.head())
 print(f"Número total de filas en df: {len(df)}")
 
 # Paso 2: creacion del modelo.
-# => Y = 1/(1+ e^-(a + b*X)) -- funcion logistica.
-# TipoInfraccion = 1/ 1 +( e^-( a + b1 * Latitud + b2 * Longitud + b3 * Horainfraccion + b4 * DiaSemanaInfraccion + b5 * MesInfraccion))
+# => Y  a + b*X -- funcion logistica.
+# TipoInfraccion = a + b1 * Latitud + b2 * Longitud + b3 * Horainfraccion + b4 * DiaSemanaInfraccion + b5 * MesInfraccion
 # separo variable explicada y explicativas ->
 Y = df['CantidadInfracciones']
 X = df.drop(columns=['CantidadInfracciones'])
+
+
+
+#--------------------------------------------------------
+# Recordar que:
+# scikit-learn.LogisticRegression con configuración multinomial es adecuado para
+# tareas de clasificación práctica y optimización en contextos de producción, y
+# proporciona herramientas para validar y ajustar el modelo.    
+#--------------------------------------------------------
+
+# Validación del modelo logístico con conjuntos de entrenamiento y prueba
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
