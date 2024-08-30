@@ -135,13 +135,17 @@ def GenerarDatosAleatorios_Modelo_3(columnas_tiposInfraccion,
     velocidad_registrada_aleatoria = _numpy.random.uniform(20, 120, size=numeroFilasRequeridas)  # Ajustar el rango según sea necesario
     velocidad_permitida_aleatoria = _numpy.random.uniform(30, 100, size=numeroFilasRequeridas)  # Ajustar el rango según sea necesario
     
+    # lat long ->
+    latitudes_aleatorias = _numpy.random.uniform(low=34.0, high=35.0, size=numeroFilasRequeridas)
+    longitudes_aleatorias = _numpy.random.uniform(low=-119.0, high=-117.0, size=numeroFilasRequeridas)
+    
     # Provincia
-    provincias = ['Buenos Aires']
-    provincias_aleatorios = _numpy.random.choice(provincias, size=numeroFilasRequeridas)
+    #provincias = ['Buenos Aires']
+    #provincias_aleatorios = _numpy.random.choice(provincias, size=numeroFilasRequeridas)
     
     # Partido
-    partidos = ['La Plata', 'ALMIRANTE BROWN', 'San Vicente', 'San Nicolas', 'Ensenada', 'Berisso']
-    partidos_aleatorios = _numpy.random.choice(partidos, size=numeroFilasRequeridas)
+    #partidos = ['La Plata', 'ALMIRANTE BROWN', 'San Vicente', 'San Nicolas', 'Ensenada', 'Berisso']
+    #partidos_aleatorios = _numpy.random.choice(partidos, size=numeroFilasRequeridas)
     
     # Numero de serie equipo ->
     equipos_validos = [equipo for equipo in valores_numeroSerieEquipo if equipo is not None]
@@ -184,12 +188,14 @@ def GenerarDatosAleatorios_Modelo_3(columnas_tiposInfraccion,
         'TipoVehiculo': tipo_vehiculo_aleatorios,
         'VelocidadRegistrada': velocidad_registrada_aleatoria,
         'VelocidadPermitida': velocidad_permitida_aleatoria,
-        'ProvinciaInfraccion': provincias_aleatorios,
-        'PartidoInfraccion': partidos_aleatorios,
+        #'ProvinciaInfraccion': provincias_aleatorios,
+        #'PartidoInfraccion': partidos_aleatorios,
         'HoraDelDia': horas_aleatorias,
         'DiaDeLaSemana': dias_semana_aleatorios,
         'Mes': meses_aleatorios,
-        'Carril': carril_aleatorio
+        'Carril': carril_aleatorio,
+        'LatitudInfraccion': latitudes_aleatorias,
+        'LongitudInfraccion':longitudes_aleatorias
     })
     
     return df_aleatorio

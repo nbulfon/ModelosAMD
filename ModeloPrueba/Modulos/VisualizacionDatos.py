@@ -2,6 +2,7 @@
 
 import matplotlib.pyplot as _plt
 import seaborn as sns
+from sklearn.metrics import roc_curve, auc
 
 def GraficarResultados(y_test, y_pred, titulo='Resultados de la Prediccion'):
     """
@@ -95,5 +96,21 @@ def GraficarDistribucionErrores(errores_residuales):
     _plt.show()
     
     
-    
+def GraficarCurvaROC(Y_test, Y_pred_proba):
+
+    fpr, tpr, thresholds = roc_curve(Y_test, Y_pred_proba)
+    roc_auc = auc(fpr, tpr)
+
+    # Graficar la curva ROC
+    _plt.figure()
+    _plt.plot(fpr, tpr, color='darkorange', lw=2, label='ROC curve (area = %0.2f)' % roc_auc)
+    _plt.plot([0, 1], [0, 1], color='navy', lw=2, linestyle='--')
+    _plt.xlim([0.0, 1.0])
+    _plt.ylim([0.0, 1.05])
+    _plt.xlabel('False Positive Rate')
+    _plt.ylabel('True Positive Rate')
+    _plt.title('Receiver Operating Characteristic')
+    _plt.legend(loc="lower right")
+    _plt.show()
+
     

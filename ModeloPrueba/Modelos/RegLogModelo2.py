@@ -7,38 +7,41 @@
 ### El objetivo de este primer modelo, es predecir la probabilidad de ocurrencia de que
 ### los proximos n registros sean con infraccion.
 ### (Regresion logistica multinomial).
+### IMPORTANTE. PARA MODELOS DE VAR. DEPENDIENTE DICOTOMICA, EL R^2 NO SIRVE MUCHO -> VER GUJARATI.
 ###
 import matplotlib.pyplot as _plt
 import pandas as _pandas
 import numpy as _numpy
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LogisticRegression
-from sklearn.metrics import accuracy_score,classification_report,confusion_matrix
 import statsmodels.api as sm
 from sklearn.preprocessing import LabelEncoder
 from statsmodels.stats.outliers_influence import variance_inflation_factor
+from sklearn.preprocessing import StandardScaler
 
 import ManejoDatos as _manejoData
-import EntrenamientoTesteoDatos as _trainingTestData
+#import EntrenamientoTesteoDatos as _trainingTestData
 import VisualizacionDatos as _visualizeData
 
 
 # Paso 1
 # llamo a la función para limpiar, procesar y generar datos ->
-df = _manejoData.PrepararDatos_Modelo_3(num_filas_aleatorias_requeridas=10000)
+df = _manejoData.PrepararDatos_Modelo_3(num_filas_aleatorias_requeridas=15000)
 
 # muestro las primeras filas del DataFrame resultante ->
 print(df.head())
 print(f"Número total de filas en df: {len(df)}")
 # FIN Paso 1
 
+
 # Codificacion de variables categoricas. (Dummies)
 columnas_categoricas = ['NumeroDeSerieEquipo',
-                        'ProvinciaInfraccion',
-                        'PartidoInfraccion',
+                        #'ProvinciaInfraccion',
+                        #'PartidoInfraccion',
                         'TipoInfraccion',
                         'TipoVehiculo',
                         'GrupoVehiculo']
+
 for columna in columnas_categoricas:
     df = _manejoData.CodificarColumnasCategoricas(df, columna)
 # FIN Codificacion de variables categoricas (Dummies)
@@ -62,7 +65,7 @@ Y_encoded = _numpy.array(Y_encoded, dtype=float)
 # Agregar constante para el termino de intercepcion
 X_sm = sm.add_constant(X)  
 
-# Verificar multicolinealidad con VIF
+# Verificar multicolinealidad con VIF.
 # Valores de VIF mayores a 5 o 10 indican una alta multicolinealidad que podría ser problemática.
 vif_data = _pandas.DataFrame()
 vif_data["feature"] = X_sm.columns
@@ -74,18 +77,8 @@ print(vif_data)
 mnlogit_model = sm.MNLogit(Y_encoded, X_sm)
 # Ajustar el modelo
 result = mnlogit_model.fit()
-
 # Mostrar el resumen del modelo
 print(result.summary())
-
-# Calcular McFadden's R²
-llf = result.llf  # log-likelihood del modelo ajustado
-llnull = result.llnull  # log-likelihood del modelo solo con el intercepto
-
-mcfadden_r2 = 1 - (llf / llnull)
-print(f"McFadden's R²: {mcfadden_r2:.4f}")
-
-
 
 
 #--------------------------------------------------------
@@ -96,12 +89,24 @@ print(f"McFadden's R²: {mcfadden_r2:.4f}")
 #--------------------------------------------------------
 
 # Validación del modelo logístico con conjuntos de entrenamiento y prueba
-X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=0.3, random_state=0)
-# Entrenar el modelo con el conjunto de entrenamiento
-lm = LogisticRegression(multi_class='multinomial', solver='lbfgs', max_iter=1000)
-lm.fit(X_train, Y_train)
+X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=0.3, random_state=50)
 
-# Realizar predicciones
+# escalado de los datos.
+scaler = StandardScaler()
+# ajustado y transformado de los datos de entrenamiento,
+# transformando también los datos de prueba.
+X_train_scaled = scaler.fit_transform(X_train)
+X_test_scaled = scaler.transform(X_test)
+
+# convierto arrays escalados de vuelta a DataFrames para mantener nombres de columnas.
+X_train_scaled = _pandas.DataFrame(X_train_scaled, columns=X.columns)
+X_test_scaled = _pandas.DataFrame(X_test_scaled, columns=X.columns)
+
+# entreno al modelo con el conjunto de entrenamiento ->
+lm = LogisticRegression(multi_class='multinomial', solver='lbfgs', max_iter=2000)
+lm.fit(X_train_scaled, Y_train)
+
+# realizo predicciones ->
 Y_pred = lm.predict(X_test)
 Y_pred_proba = lm.predict_proba(X_test)
 
@@ -115,9 +120,56 @@ print(Y_pred[:10])
  #Cada columna representa la probabilidad de que la observación pertenezca a una clase particular.    
 print(Y_pred_proba[:10])
 
-# Evaluar el modelo
-accuracy = accuracy_score(Y_test, Y_pred) # es como el R2...(masomenos)
+# Evaluacion del modelo (METRICAS IMPORTANTES DEBAJO).
+
+from sklearn.metrics import confusion_matrix
+import seaborn as sns
+from sklearn.metrics import precision_score, recall_score, f1_score, accuracy_score,classification_report
+
+# Matriz de Confusión.
+matrizConfusion = confusion_matrix(Y_test, Y_pred)
+sns.heatmap(matrizConfusion, annot=True, fmt="d")
+
+# Accuracy (Exactitud).
+accuracy = accuracy_score(Y_test, Y_pred)
 print(f'Exactitud en el conjunto de prueba: {accuracy:.2f}')
+
+# Precision: mide la proporción de verdaderos positivos
+# sobre el total de positivos predichos.
+# Es útil cuando el costo de un falso positivo es alto.
+
+# Recall (Sensibilidad o Tasa de Verdaderos Positivos):
+# Mide la proporción de verdaderos positivos sobre el total de positivos reales.
+# Es útil cuando el costo de un falso negativo es alto.
+
+# F1-Score: Es la media armónica de la precisión y el recall,
+# proporcionando una métrica equilibrada cuando hay una relación
+# desigual entre precision y recall.
+
+precision = precision_score(Y_test, Y_pred, average='weighted')
+recall = recall_score(Y_test, Y_pred, average='weighted')
+f1 = f1_score(Y_test, Y_pred, average='weighted')
+
+# ROC Curve y AUC (Área Bajo la Curva)
+#_visualizeData.GraficarCurvaROC(Y_test, Y_pred_proba)
+from sklearn.metrics import roc_curve, auc
+fpr, tpr, thresholds = roc_curve(Y_test['Si_Infraccion'], Y_pred_proba)
+roc_auc = auc(fpr, tpr)
+
+# Graficar la curva ROC
+_plt.figure()
+_plt.plot(fpr, tpr, color='darkorange', lw=2, label='ROC curve (area = %0.2f)' % roc_auc)
+_plt.plot([0, 1], [0, 1], color='navy', lw=2, linestyle='--')
+_plt.xlim([0.0, 1.0])
+_plt.ylim([0.0, 1.05])
+_plt.xlabel('False Positive Rate')
+_plt.ylabel('True Positive Rate')
+_plt.title('Receiver Operating Characteristic')
+_plt.legend(loc="lower right")
+_plt.show()
+
+
+
 # Reporte de clasificación
 print("\nReporte de Clasificación:")
 print(classification_report(Y_test, Y_pred))

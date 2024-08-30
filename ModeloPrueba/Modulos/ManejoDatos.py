@@ -155,7 +155,7 @@ def PrepararDatos_Modelo_3(num_filas_aleatorias_requeridas):
     dataGrupoVehiculo = _context.EjecutarQuery('SELECT * FROM "GrupoVehiculo"')
     
     ## -----ESTA PARTE LUEGO SE VA, FALTA AGREGAR LA TABLA EN LA BASE DE DATOS-----
-    filepath = r"C:\\Nicolas\\AMD_Modelos_ML\\ModelosAMD\\ModeloPrueba"
+    filepath = r"C:\\Nicolas\\ModelosAMD\\ModeloPrueba"
     file = filepath + "\\" + "URBAN_000372.csv"
     dataEstadisticas = _pandas.read_csv(file, sep=";")
     dataEstadisticas['Si_Infraccion'] = False
@@ -175,14 +175,21 @@ def PrepararDatos_Modelo_3(num_filas_aleatorias_requeridas):
     df = data[['Si_Infraccion','NumeroDeSerieEquipo', 'FechaYHoraInfraccion', 
                'TipoInfraccionId', 'GrupoVehiculoId', 'TipoVehiculoId',
                'VelocidadRegistrada','VelocidadPermitida',
-               'ProvinciaInfraccion', 'PartidoInfraccion']]
+               #'ProvinciaInfraccion', 'PartidoInfraccion'
+               'LatitudInfraccion','LongitudInfraccion']]
     
     
     # Rellenar valores NaN con la media o la moda s/corresponda.
     df = RellenarNullsConLaMedia(df, 'TipoVehiculoId')
     df = RellenarNullsConLaMedia(df, 'GrupoVehiculoId')
-    df = RellenarNullsConLaModa(df, 'ProvinciaInfraccion')
-    df = RellenarNullsConLaModa(df, 'PartidoInfraccion')
+    #df = RellenarNullsConLaModa(df, 'ProvinciaInfraccion')
+    #df = RellenarNullsConLaModa(df, 'PartidoInfraccion')
+    
+    # convertir valores no convertibles a NaN
+    df['LatitudInfraccion'] = _pandas.to_numeric(df['LatitudInfraccion'], errors='coerce')
+    df['LongitudInfraccion'] = _pandas.to_numeric(df['LongitudInfraccion'], errors='coerce')
+    df = RellenarNullsConLaMedia(df, 'LatitudInfraccion')
+    df = RellenarNullsConLaMedia(df, 'LongitudInfraccion')
     
     # Crear nuevas columnas para tener la fecha separada
     df['HoraDelDia'] = data['FechaYHoraInfraccion'].dt.hour
@@ -201,7 +208,9 @@ def PrepararDatos_Modelo_3(num_filas_aleatorias_requeridas):
     
     df['VelocidadRegistrada'] = df['VelocidadRegistrada'].str.replace(',', '.').astype('float64')
     df['VelocidadPermitida'] = df['VelocidadPermitida'].str.replace(',', '.').astype('float64')
-    #print(estadisticas_seleccionadas.VelocidadRegistrada.dtypes)
+    df['LatitudInfraccion'] = df['LatitudInfraccion'].astype('float64')
+    
+    #print(df.LatitudInfraccion.dtypes)
     
     df = _pandas.concat([df, estadisticas_seleccionadas], ignore_index=True)
     df = EliminarColumna(df, 'FechaYHoraInfraccion')
@@ -212,17 +221,18 @@ def PrepararDatos_Modelo_3(num_filas_aleatorias_requeridas):
     df = RellenarNullsConLaModa(df, 'GrupoVehiculo')
     df = RellenarNullsConLaModa(df, 'TipoInfraccion')
     df = RellenarNullsConLaModa(df, 'NumeroDeSerieEquipo')
-    df = RellenarNullsConLaModa(df, 'ProvinciaInfraccion')
-    df = RellenarNullsConLaModa(df, 'PartidoInfraccion')
+    #df = RellenarNullsConLaModa(df, 'ProvinciaInfraccion')
+    #df = RellenarNullsConLaModa(df, 'PartidoInfraccion')
     df = RellenarNullsConLaModa(df, 'NumeroDeSerieEquipo')
-    
+    df = RellenarNullsConLaMedia(df, 'LatitudInfraccion')
+    df = RellenarNullsConLaMedia(df, 'LongitudInfraccion')
     
     # Generacion aleatoria de datos
     if (num_filas_aleatorias_requeridas > 0):
         df_aleatorio = _generacionDatos.GenerarDatosAleatorios_Modelo_3(
-            dataTipoInf.columns,
-            dataTipoVehiculo.columns,
-            dataGrupoVehiculo.columns,
+            dataTipoInf['Descripcion'].values,
+            dataTipoVehiculo['Descripcion'].values,
+            dataGrupoVehiculo['Descripcion'].values,
             data['NumeroDeSerieEquipo'].values,
             numeroFilasRequeridas=num_filas_aleatorias_requeridas)
         df = _pandas.concat([df, df_aleatorio], ignore_index=True)
@@ -376,6 +386,8 @@ def CodificarColumnasCategoricas(df, nombreColumna):
     
     # Agrego drop_first=True para evitar problemas de colinealidad
     # (donde una variable se puede predecir perfectamente con otras variables).
+    # porque para una variable Dicotomica, el resultante debe ser n-1. Es decir, la
+    # ultima se deduce por el negativo del resto.
     df = _pandas.get_dummies(df, columns=[nombreColumna], drop_first=True)
     return df
 
