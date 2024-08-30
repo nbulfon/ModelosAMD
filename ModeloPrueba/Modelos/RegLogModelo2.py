@@ -9,6 +9,28 @@
 ### (Regresion logistica multinomial).
 ### IMPORTANTE. PARA MODELOS DE VAR. DEPENDIENTE DICOTOMICA, EL R^2 NO SIRVE MUCHO -> VER GUJARATI.
 ###
+
+
+
+
+#### Notar que, si genero una cantidad de datos aleatorios de 250 mil,
+#### en lugar de 25 mil, como estaba haciendo, los resultados apenas varian.
+#### Esto da para pensar, que quizas le estoy pifiando por el lado de
+#### las variables elegidas. Variables redundantes casi no tengo. Porque use
+#### metodos para eliminarlas en base a la colinealidad, etc. Lo que debe pasar
+#### es que el modelo se explica por variables que no estoy incluyendo...
+#### (problema de Variables Omitidas).
+####
+
+
+
+
+
+
+
+
+
+
 import matplotlib.pyplot as _plt
 import pandas as _pandas
 import numpy as _numpy

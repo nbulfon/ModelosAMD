@@ -246,8 +246,8 @@ def PrepararDatos_Modelo_3(siGeneraratosAleatorios=False):
             dataTipoVehiculo['GrupoTipoVehiculo'].values,
             dataGrupoVehiculo['Descripcion'].values,
             data['NumeroDeSerieEquipo'].values,
-            numeroFilasRequeridas=25000,
-            proporción_clase_positiva=0.5)
+            numeroFilasRequeridas=250000,
+            proporción_clase_positiva=0.4)
         df = _pandas.concat([df, df_aleatorio], ignore_index=True)
     
     
