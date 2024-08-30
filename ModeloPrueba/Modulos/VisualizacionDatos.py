@@ -98,7 +98,7 @@ def GraficarDistribucionErrores(errores_residuales):
     
 def GraficarCurvaROC(Y_test, Y_pred_proba):
 
-    fpr, tpr, thresholds = roc_curve(Y_test, Y_pred_proba)
+    fpr, tpr, thresholds = roc_curve(Y_test, Y_pred_proba[:, 1])
     roc_auc = auc(fpr, tpr)
 
     # Graficar la curva ROC
@@ -107,10 +107,55 @@ def GraficarCurvaROC(Y_test, Y_pred_proba):
     _plt.plot([0, 1], [0, 1], color='navy', lw=2, linestyle='--')
     _plt.xlim([0.0, 1.0])
     _plt.ylim([0.0, 1.05])
-    _plt.xlabel('False Positive Rate')
-    _plt.ylabel('True Positive Rate')
-    _plt.title('Receiver Operating Characteristic')
+    _plt.xlabel('Tasa de Falsos Positivos')
+    _plt.ylabel('Tasa de Verdaderos Positivos')
+    _plt.title('Curva ROC para Predicción de Infracciones')
     _plt.legend(loc="lower right")
     _plt.show()
 
-    
+def GraficarHistogramaProbInfraccion(Y_pred_proba):
+    _plt.hist(Y_pred_proba[:, 1], bins=10, color='skyblue', edgecolor='black')
+    _plt.axvline(x=0.5, color='red', linestyle='--', label='Umbral de decisión (0.5)')
+    _plt.xlabel('Probabilidad Predicha de Infracción')
+    _plt.ylabel('Frecuencia')
+    _plt.title('Distribución de Probabilidades Predichas de Infracción')
+    _plt.legend()
+    _plt.show()
+
+def GraficarInfraccionesPorTiempo(X_test,Y_pred_proba):
+    X_test['Probabilidad_Infraccion'] = Y_pred_proba[:, 1]
+    infraccion_por_hora = X_test.groupby('HoraDelDia')['Probabilidad_Infraccion'].mean()
+
+    _plt.bar(infraccion_por_hora.index, infraccion_por_hora.values, color='coral')
+    _plt.xlabel('Hora del Día')
+    _plt.ylabel('Probabilidad Media de Infracción')
+    _plt.title('Probabilidad de Infracción por Hora del Día')
+    _plt.xticks(range(24))  # Horas de 0 a 23
+    _plt.show()
+
+def MapaDeCalorPrediccionesUbicacion(X_test,Y_pred_proba):
+    _plt.figure(figsize=(10, 6))
+    sns.scatterplot(x=X_test['LongitudInfraccion'], 
+                y=X_test['LatitudInfraccion'], 
+                hue=Y_pred_proba[:, 1], 
+                palette='coolwarm', 
+                size=Y_pred_proba[:, 1], 
+                sizes=(10, 200), 
+                legend=None)
+    _plt.colorbar(label='Probabilidad de Infracción')
+    _plt.xlabel('Longitud')
+    _plt.ylabel('Latitud')
+    _plt.title('Mapa de Calor de Probabilidades de Infracción')
+    _plt.show()
+
+
+
+
+
+
+
+
+
+
+
+

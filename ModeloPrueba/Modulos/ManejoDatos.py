@@ -234,10 +234,35 @@ def PrepararDatos_Modelo_3(num_filas_aleatorias_requeridas):
             dataTipoVehiculo['Descripcion'].values,
             dataGrupoVehiculo['Descripcion'].values,
             data['NumeroDeSerieEquipo'].values,
-            numeroFilasRequeridas=num_filas_aleatorias_requeridas)
+            numeroFilasRequeridas=num_filas_aleatorias_requeridas,
+            proporción_clase_positiva=0.7)
         df = _pandas.concat([df, df_aleatorio], ignore_index=True)
     
-    return df
+    
+    # Codificacion de variables categoricas. (Dummies)
+    columnas_categoricas = ['NumeroDeSerieEquipo',
+                            #'ProvinciaInfraccion',
+                            #'PartidoInfraccion',
+                            'TipoInfraccion',
+                            'TipoVehiculo',
+                            'GrupoVehiculo']
+
+    for columna in columnas_categoricas:
+        df = CodificarColumnasCategoricas(df, columna)
+    # FIN Codificacion de variables categoricas (Dummies)
+
+    # convierto todas las columnas a tipo float64 para luego hacer la regresion.
+    df = df.astype(float)
+    
+    # muestro las primeras filas del DataFrame resultante ->
+    print(df.head())
+    print(f"Número total de filas en df: {len(df)}")
+
+    # separo variable explicada y explicativas ->
+    Y = df['Si_Infraccion']
+    X = df.drop(columns=['Si_Infraccion'])
+    
+    return X , Y
 
 def RellenarNullsConLaMedia(df, nombreColumna):
     """
@@ -268,7 +293,6 @@ def RellenarNullsConLaModa(df, nombreColumna):
     df[nombreColumna] = df[nombreColumna].fillna(moda)
     return df
 
-
 def MapearColumna(df_a_mapear, df_para_ser_mapeado, column_id, column_description, new_column_name):
     """
     Mapea una columna de un DataFrame utilizando un diccionario de mapeo creado
@@ -295,7 +319,6 @@ def MapearColumna(df_a_mapear, df_para_ser_mapeado, column_id, column_descriptio
 
     return df_a_mapear
 
-
 def EliminarColumna(df, nombreColumna):
     """
     Elimina la columna especificada del DataFrame.
@@ -310,6 +333,22 @@ def EliminarColumna(df, nombreColumna):
     df = df.drop(nombreColumna, axis=1)
     return df
 
+def SeleccionarCaracteristicasImportantes(X, forest, umbral):
+    """
+    Selecciona caracterIsticas importantes basadas en su importancia
+    en el modelo de Random Forest.
+    
+    Args:
+    forest (RandomForestClassifier): Modelo de Random Forest entrenado.
+    umbral (float): Umbral de importancia para seleccionar características.
+    
+    Returns:
+    list: Lista de nombres de caracterIsticas seleccionadas.
+    """
+    importancias = _pandas.Series(forest.feature_importances_, index=X.columns)
+    caracteristicas_importantes = importancias[importancias > umbral].index.tolist()
+    print(f"CaracterIsticas seleccionadas (umbral={umbral}): {caracteristicas_importantes}")
+    return caracteristicas_importantes
 
 def EliminarFilasConNulls(df, columnas=None):
     """

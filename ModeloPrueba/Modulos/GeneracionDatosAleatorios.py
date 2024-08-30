@@ -111,7 +111,8 @@ def GenerarDatosAleatorios_Modelo_3(columnas_tiposInfraccion,
                                     columnas_tiposVehiculo,
                                     columnas_gruposVehiculo,
                                     valores_numeroSerieEquipo,
-                                    numeroFilasRequeridas):
+                                    numeroFilasRequeridas,
+                                    proporción_clase_positiva=0.5):
     """
     Genera un DataFrame con datos estocasticos para pruebas.
     Este metodo se usa para el modelo de prediccion de la probabilidad de ocurrencia
@@ -119,7 +120,8 @@ def GenerarDatosAleatorios_Modelo_3(columnas_tiposInfraccion,
     (algoritmo Regresion Logistica Multinomial)
     Args:
     numeroFilasRequeridas (int): Numero de filas de datos aleatorios a generar.
-
+    proporción_clase_positiva (float): Proporción de casos donde Si_Infraccion es True (entre 0 y 1).
+    
     Returns:
     pd.DataFrame: DataFrame con datos aleatorios.
     """
@@ -128,8 +130,13 @@ def GenerarDatosAleatorios_Modelo_3(columnas_tiposInfraccion,
     dias_semana_aleatorios = _numpy.random.randint(0, 7, size=numeroFilasRequeridas)
     meses_aleatorios = _numpy.random.randint(1, 13, size=numeroFilasRequeridas)
 
-    # Generar valores booleanos aleatorios para Si_Infraccion
-    si_infraccion_aleatorios = _numpy.random.choice([True, False], size=numeroFilasRequeridas)
+    # Generar valores booleanos aleatorios para Si_Infraccion,
+    #con una proporcion determinada (recibida por param).
+    si_infraccion_aleatorios = _numpy.random.choice(
+       [True, False], 
+       size=numeroFilasRequeridas, 
+       p=[proporción_clase_positiva, 1 - proporción_clase_positiva]
+    )
 
     # Generar velocidades aleatorias para VelocidadRegistrada y VelocidadPermitida
     velocidad_registrada_aleatoria = _numpy.random.uniform(20, 120, size=numeroFilasRequeridas)  # Ajustar el rango según sea necesario
@@ -169,11 +176,11 @@ def GenerarDatosAleatorios_Modelo_3(columnas_tiposInfraccion,
     carril_aleatorio = _numpy.random.choice([1, 2, 3], size=numeroFilasRequeridas)
     
     # Combinar fechas y horas en una sola columna de tipo datetime
-    años_aleatorios = _numpy.random.randint(2020, 2025, size=numeroFilasRequeridas)  # Rango de años puede ajustarse
+    años_aleatorios = _numpy.random.randint(2020, 2025, size=numeroFilasRequeridas)  # rango de años puede ajustarse.
     fechas_aleatorias = _pandas.to_datetime({
         'year': años_aleatorios,
         'month': meses_aleatorios,
-        'day': _numpy.random.randint(1, 29, size=numeroFilasRequeridas),  # Para simplificar, usar hasta 28 días
+        'day': _numpy.random.randint(1, 29, size=numeroFilasRequeridas),  # para simplificar, usar hasta 28 días.
         'hour': horas_aleatorias,
         'minute': _numpy.random.randint(0, 60, size=numeroFilasRequeridas),
         'second': _numpy.random.randint(0, 60, size=numeroFilasRequeridas)
