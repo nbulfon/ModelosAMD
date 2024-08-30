@@ -95,7 +95,7 @@ X_test_scaled = _pandas.DataFrame(X_test_scaled, columns=X_filtrado.columns)
 # entreno al modelo con el conjunto de entrenamiento ->
 lm = LogisticRegression(multi_class='multinomial',
                         solver='lbfgs',
-                        max_iter=2000,
+                        max_iter=10000,
                         class_weight='balanced')
 lm.fit(X_train_scaled, Y_train)
 
@@ -140,7 +140,10 @@ print(classification_report(Y_test, Y_pred))
 
 # Cross validation ->
 from sklearn.model_selection import cross_val_score
-scores = cross_val_score(lm, X_train_scaled, Y_train, cv=5, scoring='f1_weighted')
+
+
+scores = cross_val_score(lm, X_train_scaled, Y_train, cv=5, scoring='accuracy')
+scores
 print(f"F1-Score promedio con validación cruzada: {scores.mean():.4f}")
 
 
