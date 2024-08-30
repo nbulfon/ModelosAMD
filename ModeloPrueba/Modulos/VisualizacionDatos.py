@@ -148,8 +148,74 @@ def MapaDeCalorPrediccionesUbicacion(X_test,Y_pred_proba):
     _plt.title('Mapa de Calor de Probabilidades de Infracción')
     _plt.show()
 
+def GraficarDispersion_Prob(
+        df,
+        probabilidades_infraccion,
+        nombreColumna_X):
+    """
+    Crea un grafico de dispersion para mostrar la relacion entre la columna por param.
+    y la probabilidad de infraccion.
 
+    Args:
+    df (pd.DataFrame): DataFrame que contiene los datos, incluyendo la columna 'VelocidadRegistrada'.
+    probabilidades_infraccion (array-like): Array que contiene las probabilidades de infraccion predichas.
 
+    Returns:
+    None
+    """
+    # Agregar las probabilidades de infracción al DataFrame
+    df['Probabilidad_Infraccion'] = probabilidades_infraccion
+
+    # Crear un gráfico de dispersión
+    _plt.figure(figsize=(10, 6))
+    sns.scatterplot(data=df, x=nombreColumna_X, y='Probabilidad_Infraccion', alpha=0.6, color='blue')
+
+    # Agregar una línea de tendencia suavizada usando seaborn
+    sns.regplot(data=df, x=nombreColumna_X, y='Probabilidad_Infraccion', scatter=False, color='red', lowess=True)
+
+    # Configuración de etiquetas y título
+    _plt.xlabel(nombreColumna_X)
+    _plt.ylabel('Probabilidad de Infracción')
+    _plt.title(f"Relación entre {nombreColumna_X} y Probabilidad de Infracción")
+    _plt.grid(True)
+
+    # Mostrar el gráfico
+    _plt.show()
+
+def GraficarBarras_Prob(
+        df,
+        probabilidades_infraccion,
+        nombreColumna_X):
+    """
+    Crea un grafico de barras para mostrar la relacion entre la columna por param.
+    y la probabilidad media de infraccion.
+
+    Args:
+    df (pd.DataFrame): DataFrame que contiene los datos, incluyendo la columna 'HoraDelDia'.
+    probabilidades_infraccion (array-like): Array que contiene las probabilidades de infraccion predichas.
+    
+    Returns:
+    None
+    """
+    # Agregar las probabilidades de infracción al DataFrame
+    df['Probabilidad_Infraccion'] = probabilidades_infraccion
+
+    # Calcular la probabilidad media de infracción por cada hora del día
+    probabilidad_por_hora = df.groupby(nombreColumna_X)['Probabilidad_Infraccion'].mean()
+
+    # Crear un gráfico de barras
+    _plt.figure(figsize=(10, 6))
+    probabilidad_por_hora.plot(kind='bar', color='skyblue', edgecolor='black')
+    
+    # Configuración de etiquetas y título
+    _plt.xlabel(nombreColumna_X)
+    _plt.ylabel('Probabilidad Media de Infracción')
+    _plt.title(f"Relación entre {nombreColumna_X} y Probabilidad de Infracción")
+    _plt.xticks(rotation=0)
+    _plt.grid(axis='y', linestyle='--', alpha=0.7)
+
+    # Mostrar el gráfico
+    _plt.show()
 
 
 

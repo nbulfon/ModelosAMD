@@ -38,7 +38,7 @@ forest.fit(X, Y)
 # obtengo las caracteristicas importantes dados los datos que me proporciona
 # el bosque aleatorio que entrene y segun mi umbral de decision ->
 caracteristicas_importantes = _manejoData.SeleccionarCaracteristicasImportantes(
-    X, forest, umbral=0.019)
+    X, forest, umbral=0.05)
 
 # Filtrar X para usar solo características importantes
 X_filtrado = X[caracteristicas_importantes]
@@ -162,10 +162,24 @@ _visualizeData.GraficarCurvaROC(Y_test, Y_pred_proba)
 _visualizeData.GraficarHistogramaProbInfraccion(Y_pred_proba)
 _visualizeData.GraficarInfraccionesPorTiempo(X_test,Y_pred_proba)
 _visualizeData.MapaDeCalorPrediccionesUbicacion(X_test,Y_pred_proba)
+_visualizeData.GraficarDispersion_Prob(
+    X_test,
+    Y_pred_proba[:, 1],
+    nombreColumna_X='VelocidadRegistrada')
 
+_visualizeData.GraficarDispersion_Prob(
+    X_test,
+    Y_pred_proba[:, 1],
+    nombreColumna_X='LatitudInfraccion')
+_visualizeData.GraficarDispersion_Prob(
+    X_test,
+    Y_pred_proba[:, 1],
+    nombreColumna_X='LongitudInfraccion')
 
-
-
+_visualizeData.GraficarBarras_Prob(
+    X_test,
+    Y_pred_proba[:, 1],
+    nombreColumna_X='HoraDelDia')
 
 
 

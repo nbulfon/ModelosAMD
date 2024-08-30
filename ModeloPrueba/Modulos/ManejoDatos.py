@@ -151,8 +151,20 @@ def PrepararDatos_Modelo_3(siGeneraratosAleatorios=False):
     data = _context.EjecutarQuery('SELECT * FROM "Infraccion"')
     data['Si_Infraccion'] = True
     dataTipoInf = _context.EjecutarQuery('SELECT * FROM "TipoInfraccion"')
-    dataTipoVehiculo = _context.EjecutarQuery('SELECT * FROM "TipoVehiculo"')
     dataGrupoVehiculo = _context.EjecutarQuery('SELECT * FROM "GrupoVehiculo"')
+    dataTipoVehiculo = _context.EjecutarQuery('SELECT * FROM "TipoVehiculo"')
+    def asignar_grupo_a_tipoVehiculo(descripcion):
+        if descripcion.startswith('L'):
+            return 'L'
+        elif descripcion.startswith('N'):
+            return 'N'
+        elif descripcion.startswith('M'):
+            return 'M'
+        elif descripcion.startswith('O'):
+            return 'O'
+    
+    dataTipoVehiculo['GrupoTipoVehiculo'] = dataTipoVehiculo['Descripcion'].apply(asignar_grupo_a_tipoVehiculo) 
+
     
     ## -----ESTA PARTE LUEGO SE VA, FALTA AGREGAR LA TABLA EN LA BASE DE DATOS-----
     filepath = r"C:\\Nicolas\\ModelosAMD\\ModeloPrueba"
@@ -231,7 +243,7 @@ def PrepararDatos_Modelo_3(siGeneraratosAleatorios=False):
     if (siGeneraratosAleatorios):
         df_aleatorio = _generacionDatos.GenerarDatosAleatorios_Modelo_3(
             dataTipoInf['Descripcion'].values,
-            dataTipoVehiculo['Descripcion'].values,
+            dataTipoVehiculo['GrupoTipoVehiculo'].values,
             dataGrupoVehiculo['Descripcion'].values,
             data['NumeroDeSerieEquipo'].values,
             numeroFilasRequeridas=25000,
