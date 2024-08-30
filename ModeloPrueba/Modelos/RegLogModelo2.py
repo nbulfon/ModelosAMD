@@ -146,7 +146,6 @@ print(f"F1-Score promedio con validación cruzada: {scores.mean():.4f}")
 
 # FIN Paso 3.
 
-
 # Paso 3: Visualizar resultados
 
 # Matriz de Confusión.
@@ -163,7 +162,6 @@ _visualizeData.GraficarCurvaROC(Y_test, Y_pred_proba)
 _visualizeData.GraficarHistogramaProbInfraccion(Y_pred_proba)
 _visualizeData.GraficarInfraccionesPorTiempo(X_test,Y_pred_proba)
 _visualizeData.MapaDeCalorPrediccionesUbicacion(X_test,Y_pred_proba)
-
 
 
 
