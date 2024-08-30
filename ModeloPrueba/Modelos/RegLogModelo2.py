@@ -27,7 +27,7 @@ import VisualizacionDatos as _visualizeData
 
 # Paso 1
 # llamo a la función para limpiar, procesar y generar datos ->
-X , Y = _manejoData.PrepararDatos_Modelo_3(num_filas_aleatorias_requeridas=15000)
+X , Y = _manejoData.PrepararDatos_Modelo_3(siGeneraratosAleatorios=True)
 # FIN Paso 1
 
 # Paso 2
@@ -38,7 +38,7 @@ forest.fit(X, Y)
 # obtengo las caracteristicas importantes dados los datos que me proporciona
 # el bosque aleatorio que entrene y segun mi umbral de decision ->
 caracteristicas_importantes = _manejoData.SeleccionarCaracteristicasImportantes(
-    X, forest, umbral=0.01)
+    X, forest, umbral=0.019)
 
 # Filtrar X para usar solo características importantes
 X_filtrado = X[caracteristicas_importantes]

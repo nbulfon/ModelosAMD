@@ -134,7 +134,7 @@ def PrepararDatos_Modelo_2(num_filas_aleatorias_requeridas=5000):
 
 # Esta funcion, es para preparar los datos del modelo que intentara predecir la probabilidad de ocurrencia
 # de que los proximos n registros sean con infraccion.
-def PrepararDatos_Modelo_3(num_filas_aleatorias_requeridas):
+def PrepararDatos_Modelo_3(siGeneraratosAleatorios=False):
     """
     Limpia y procesa los datos, y genera datos aleatorios adicionales.
     Esta funcion, es para el modelo que intentara predecir la probabilidad de ocurrencia 
@@ -228,14 +228,14 @@ def PrepararDatos_Modelo_3(num_filas_aleatorias_requeridas):
     df = RellenarNullsConLaMedia(df, 'LongitudInfraccion')
     
     # Generacion aleatoria de datos
-    if (num_filas_aleatorias_requeridas > 0):
+    if (siGeneraratosAleatorios):
         df_aleatorio = _generacionDatos.GenerarDatosAleatorios_Modelo_3(
             dataTipoInf['Descripcion'].values,
             dataTipoVehiculo['Descripcion'].values,
             dataGrupoVehiculo['Descripcion'].values,
             data['NumeroDeSerieEquipo'].values,
-            numeroFilasRequeridas=num_filas_aleatorias_requeridas,
-            proporción_clase_positiva=0.7)
+            numeroFilasRequeridas=15000,
+            proporción_clase_positiva=0.5)
         df = _pandas.concat([df, df_aleatorio], ignore_index=True)
     
     
@@ -347,6 +347,7 @@ def SeleccionarCaracteristicasImportantes(X, forest, umbral):
     """
     importancias = _pandas.Series(forest.feature_importances_, index=X.columns)
     caracteristicas_importantes = importancias[importancias > umbral].index.tolist()
+    print(f"Importancias: {importancias}")
     print(f"CaracterIsticas seleccionadas (umbral={umbral}): {caracteristicas_importantes}")
     return caracteristicas_importantes
 

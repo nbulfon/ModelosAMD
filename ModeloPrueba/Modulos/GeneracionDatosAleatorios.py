@@ -112,7 +112,7 @@ def GenerarDatosAleatorios_Modelo_3(columnas_tiposInfraccion,
                                     columnas_gruposVehiculo,
                                     valores_numeroSerieEquipo,
                                     numeroFilasRequeridas,
-                                    proporción_clase_positiva=0.5):
+                                    proporción_clase_positiva):
     """
     Genera un DataFrame con datos estocasticos para pruebas.
     Este metodo se usa para el modelo de prediccion de la probabilidad de ocurrencia
